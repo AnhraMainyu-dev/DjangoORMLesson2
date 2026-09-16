@@ -26,7 +26,11 @@ class OrderSerializer(ModelSerializer):
         products = validated_data.pop('products')
         order = Order.objects.create(**validated_data)
         for product in products:
-            OrderItem.objects.create(order=order, **product)
+            OrderItem.objects.create(
+                order=order,
+                price=product['product'].price,
+                **product
+            )
         return order
 
 def banners_list_api(request):
