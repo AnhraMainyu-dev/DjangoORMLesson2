@@ -136,6 +136,10 @@ class Order(models.Model):
         DELIVERING = 'DELIVERING', 'У курьера'
         COMPLETED = 'COMPLETED', 'Доставлен'
 
+    class PaymentMethod(models.TextChoices):
+        CASH = 'CASH', 'Наличные'
+        CARD = 'CARD', 'Безнал'
+
     objects = OrderQuerySet.as_manager()
 
     firstname = models.CharField(
@@ -161,7 +165,15 @@ class Order(models.Model):
         default=Status.CREATED,
         db_index=True,
     )
+    payment_method = models.CharField(
+        'способ оплаты',
+        max_length=15,
+        choices=PaymentMethod.choices,
+        db_index=True,
+    )
+
     comment = models.TextField('комментарий', blank=True)
+
     created_at = models.DateTimeField(
         'время принятия заказа',
         default=timezone.now,
