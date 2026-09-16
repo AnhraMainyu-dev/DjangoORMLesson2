@@ -1,9 +1,11 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
 from pprint import pprint
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 import json
 
-from .models import Product
+from .models import Product, OrderItem, Order
 
 
 def banners_list_api(request):
@@ -57,13 +59,23 @@ def product_list_api(request):
         'indent': 4,
     })
 
-
+@api_view(['GET', 'POST'])
 def register_order(request):
-    try:
-        data = json.loads(request.body.decode())
-        pprint(data)
-    except ValueError:
-        return JsonResponse({
-            'error': 'Value Error',
-        }, status=400)
-    return JsonResponse(data)
+    if request.method == 'GET':
+        return Response({})
+
+    order = Order.objects.create(
+        firstname=request.data['firstname'],
+        lastname=request.data['lastname'],
+        phonenumber=request.data['phonenumber'],
+        address=request.data['address']
+    )
+
+    for item in request.data['products']:
+        OrderItem.objects.create(
+            order=order,
+            product_id=item['product'],
+            quantity=item['quantity']
+        )
+
+    return Response({})
