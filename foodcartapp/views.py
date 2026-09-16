@@ -3,6 +3,7 @@ from django.templatetags.static import static
 from pprint import pprint
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 import json
 
 from .models import Product, OrderItem, Order
@@ -63,6 +64,32 @@ def product_list_api(request):
 def register_order(request):
     if request.method == 'GET':
         return Response({})
+
+    if 'products' not in request.data:
+        return Response({
+            'products': 'Обязательное поле'
+        }, status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    products = request.data.get('products')
+
+    if products is None:
+        return Response({
+            'products': 'Это поле не может быть пустым'
+        }, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not isinstance(products, list):
+        return Response({
+            'products': f'Ожидался list со значениями, но был получен "str"'
+        }, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not products:
+        return Response({
+            'products': 'Этот список не может быть пустым'
+        }, status=status.HTTP_400_BAD_REQUEST
+        )
 
     order = Order.objects.create(
         firstname=request.data['firstname'],
