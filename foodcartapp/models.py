@@ -160,7 +160,7 @@ class Order(models.Model):
         default=Status.CREATED,
         db_index=True,
     )
-
+    comment = models.TextField('комментарий', blank=True)
     class Meta:
         verbose_name = 'оформленный заказ'
         verbose_name_plural = 'оформленные заказы'
