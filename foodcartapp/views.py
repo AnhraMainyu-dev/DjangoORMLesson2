@@ -4,10 +4,30 @@ from pprint import pprint
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import CharField
 import json
 
 from .models import Product, OrderItem, Order
 
+
+class OrderItemSerializer(ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity']
+
+class OrderSerializer(ModelSerializer):
+    products = OrderItemSerializer(many=True, write_only=True, allow_empty=False)
+    class Meta:
+        model = Order
+        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
+
+    def create(self, validated_data):
+        products = validated_data.pop('products')
+        order = Order.objects.create(**validated_data)
+        for product in products:
+            OrderItem.objects.create(order=order, **product)
+        return order
 
 def banners_list_api(request):
     # FIXME move data to db?
@@ -65,44 +85,8 @@ def register_order(request):
     if request.method == 'GET':
         return Response({})
 
-    if 'products' not in request.data:
-        return Response({
-            'products': 'Обязательное поле'
-        }, status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    products = request.data.get('products')
-
-    if products is None:
-        return Response({
-            'products': 'Это поле не может быть пустым'
-        }, status=status.HTTP_400_BAD_REQUEST
-        )
-
-    if not isinstance(products, list):
-        return Response({
-            'products': f'Ожидался list со значениями, но был получен "str"'
-        }, status=status.HTTP_400_BAD_REQUEST
-        )
-
-    if not products:
-        return Response({
-            'products': 'Этот список не может быть пустым'
-        }, status=status.HTTP_400_BAD_REQUEST
-        )
-
-    order = Order.objects.create(
-        firstname=request.data['firstname'],
-        lastname=request.data['lastname'],
-        phonenumber=request.data['phonenumber'],
-        address=request.data['address']
-    )
-
-    for item in request.data['products']:
-        OrderItem.objects.create(
-            order=order,
-            product_id=item['product'],
-            quantity=item['quantity']
-        )
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
 
     return Response({})
