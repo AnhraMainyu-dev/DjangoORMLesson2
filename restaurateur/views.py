@@ -2,6 +2,7 @@ from django import forms
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
+from django.urls import reverse
 from django.contrib.auth.decorators import user_passes_test
 
 from django.contrib.auth import authenticate, login
@@ -93,5 +94,5 @@ def view_restaurants(request):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     return render(request, template_name='order_items.html', context={
-        'order_items': Order.objects.with_sum(),
+        'order_items': Order.objects.with_sum()
     })
