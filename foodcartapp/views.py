@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
+from django.db import transaction
 from pprint import pprint
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -22,6 +23,7 @@ class OrderSerializer(ModelSerializer):
         model = Order
         fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
 
+    @transaction.atomic
     def create(self, validated_data):
         products = validated_data.pop('products')
         order = Order.objects.create(**validated_data)
