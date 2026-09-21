@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models import Count, F, Value, Sum
+from django.db.models import Count, F, Value, Sum, Case, When, IntegerField
 from django.utils import timezone
 
 class Restaurant(models.Model):
@@ -31,6 +31,17 @@ class Restaurant(models.Model):
 class OrderQuerySet(models.QuerySet):
     def with_sum(self):
         return self.annotate(sum=Sum(F('items__quantity') * F('items__price')))
+
+    def with_status_order(self):
+        return self.annotate(
+            status_order=Case(
+                When(status=Order.Status.CREATED, then=Value(1)),
+                When(status=Order.Status.COOKING, then=Value(2)),
+                When(status=Order.Status.DELIVERING, then=Value(3)),
+                When(status=Order.Status.COMPLETED, then=Value(4)),
+                output_field=IntegerField(),
+            )
+        ).order_by('status_order', 'created_at')
 
 
 class ProductQuerySet(models.QuerySet):
@@ -187,6 +198,14 @@ class Order(models.Model):
         'время доставки',
         blank=True,
         null=True,
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        related_name='orders',
+        verbose_name='готовящий заказ ресторан',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:

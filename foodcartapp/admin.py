@@ -107,12 +107,12 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductCategory)
-class ProductAdmin(admin.ModelAdmin):
+class ProductCategoryAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['firstname', 'lastname', 'phonenumber']
+    list_display = ['firstname', 'lastname', 'phonenumber', 'status']
     inlines = [OrderItemInline]
 
     def response_change(self, request, obj):
@@ -121,3 +121,8 @@ class OrderAdmin(admin.ModelAdmin):
             return redirect(next_url)
         return super().response_change(request, obj)
 
+
+
+@admin.register(RestaurantMenuItem)
+class RestaurantMenuItemAdmin(admin.ModelAdmin):
+    list_display = ['restaurant', 'product', 'availability']
