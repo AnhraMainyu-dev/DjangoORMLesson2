@@ -1,12 +1,15 @@
 from django import forms
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.urls import reverse
+import requests
 from django.contrib.auth.decorators import user_passes_test
 from collections import defaultdict
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from .coordinates_calculation import fetch_coordinates, get_distance
 
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderItem
@@ -93,6 +96,8 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    yandex_apikey = settings.YANDEX_API_KEY
+
     orders = list(Order.objects.with_sum().exclude(status=Order.Status.COMPLETED).with_status_order().prefetch_related('items'))
     menu = RestaurantMenuItem.objects.filter(availability=True).values_list('restaurant_id', 'product_id')
     restaurants = Restaurant.objects.in_bulk()
@@ -104,7 +109,30 @@ def view_orders(request):
         order_product_ids = {item.product_id for item in order.items.all()}
         for restaurant_id, product_ids in restaurant_products.items():
             if order_product_ids <= product_ids:
-                order.available_restaurants.append(restaurants[restaurant_id].name)
+                order.available_restaurants.append(restaurants[restaurant_id])
+
+    for order in orders:
+        try:
+            client_coordinates = fetch_coordinates(yandex_apikey, order.address)
+        except requests.exceptions.RequestException:
+            client_coordinates = None
+
+        order.restaurants_with_distance = []
+        for restaurant in order.available_restaurants:
+            try:
+                restaurant_coordinates = fetch_coordinates(yandex_apikey, restaurant.address)
+            except requests.exceptions.RequestException:
+                restaurant_coordinates = None
+
+            restaurant_distance = None
+            if client_coordinates and restaurant_coordinates:
+                client_lon, client_lat = client_coordinates
+                restaurant_lon, restaurant_lat = restaurant_coordinates
+                restaurant_distance = get_distance(restaurant_lat, restaurant_lon, client_lat, client_lon)
+            order.restaurants_with_distance.append((restaurant, restaurant_distance))
+
+        order.restaurants_with_distance = sorted(order.restaurants_with_distance, key=lambda item: item[1])
+
 
     return render(request, template_name='order_items.html', context={
         'order_items': orders

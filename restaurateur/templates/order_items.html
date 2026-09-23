@@ -19,9 +19,9 @@
       <th>Телефон</th>
       <th>Адрес доставки</th>
       <th>Статус</th>
-      <th>Страница заказа</th>
-      <th>Рестораны</th>
       <th>Комментарий</th>
+      <th>Рестораны</th>
+      <th>Страница заказа</th>
     </tr>
 
     {% for item in order_items %}
@@ -38,8 +38,15 @@
         <details>
         <summary>Может быть приготовлено ресторанами: ↓</summary>
         <ul>
-          {% for restaurant in item.available_restaurants %}
-          <li>{{ restaurant }}</li>
+          {% for restaurant, restaurant_distance in item.restaurants_with_distance %}
+          <li>
+            {{ restaurant.name }}
+            {% if restaurant_distance is not None %}
+              {{ restaurant_distance|floatformat:3 }} км
+            {% else %}
+              расстояние неизвестно
+            {% endif %}
+          </li>
           {% endfor %}
         </ul>
         </details>
