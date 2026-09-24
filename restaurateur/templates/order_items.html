@@ -24,25 +24,25 @@
       <th>Страница заказа</th>
     </tr>
 
-    {% for item in order_items %}
+    {% for order in orders %}
     <tr>
-      <td>{{ item.id }}</td>
-      <td>{{ item.sum }}</td>
-      <td>{{ item.firstname }} {{ item.lastname }}</td>
-      <td>{{ item.phonenumber }}</td>
-      <td>{{ item.address }}</td>
-      <td>{{ item.get_status_display }}</td>
-      <td>{{ item.comment }}</td>
+      <td>{{ order.id }}</td>
+      <td>{{ order.sum }}</td>
+      <td>{{ order.firstname }} {{ order.lastname }}</td>
+      <td>{{ order.phonenumber }}</td>
+      <td>{{ order.address }}</td>
+      <td>{{ order.get_status_display }}</td>
+      <td>{{ order.comment }}</td>
       <td>
-        {% if item.status == 'CREATED' %}
+        {% if order.status == 'CREATED' %}
         <details>
         <summary>Может быть приготовлено ресторанами: ↓</summary>
         <ul>
-          {% for restaurant, restaurant_distance in item.restaurants_with_distance %}
+          {% for restaurant, restaurant_distance in order.restaurants_with_distance %}
           <li>
             {{ restaurant.name }}
             {% if restaurant_distance is not None %}
-              {{ restaurant_distance|floatformat:3 }} км
+              {{ restaurant_distance|floatformat:1 }} км
             {% else %}
               расстояние неизвестно
             {% endif %}
@@ -50,14 +50,14 @@
           {% endfor %}
         </ul>
         </details>
-        {% elif item.status == 'COOKING' %}
-        Готовится в {{item.restaurant}}
-        {% elif item.status == 'DELIVERING' %}
+        {% elif order.status == 'COOKING' %}
+        Готовится в {{order.restaurant}}
+        {% elif order.status == 'DELIVERING' %}
         У курьера
         {% endif %}
       </td>
       <td>
-        <a href="{% url 'admin:foodcartapp_order_change' item.id %}?next={{ request.path|urlencode }}">
+        <a href="{% url 'admin:foodcartapp_order_change' order.id %}?next={{ request.path|urlencode }}">
           Редактировать</a>
       </td>
     </tr>

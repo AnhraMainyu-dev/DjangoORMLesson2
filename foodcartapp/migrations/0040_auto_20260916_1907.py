@@ -2,12 +2,14 @@
 
 from django.db import migrations
 
+
 def set_item_prices(apps, schema_editor):
-    OrderItem = apps.get_model('foodcartapp', 'OrderItem')
-    items = OrderItem.objects.select_related('product').iterator()
+    OrderItem = apps.get_model("foodcartapp", "OrderItem")
+    items = OrderItem.objects.select_related("product").iterator()
     for item in items:
         item.price = item.product.price
         item.save()
+
 
 class Migration(migrations.Migration):
 

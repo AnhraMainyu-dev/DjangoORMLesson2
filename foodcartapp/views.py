@@ -1,98 +1,108 @@
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.db import transaction
-from pprint import pprint
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.serializers import ModelSerializer
-from rest_framework.serializers import CharField
-import json
 
-from .models import Product, OrderItem, Order
+from .models import Order, OrderItem, Product
 
 
 class OrderItemSerializer(ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ['product', 'quantity']
+        fields = ["product", "quantity"]
+
 
 class OrderSerializer(ModelSerializer):
-    products = OrderItemSerializer(many=True, write_only=True, allow_empty=False)
+    products = OrderItemSerializer(many=True, allow_empty=False, source='items')
+
     class Meta:
         model = Order
-        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
+        fields = ["id", "firstname", "lastname", "phonenumber", "address", "products"]
 
     @transaction.atomic
     def create(self, validated_data):
-        products = validated_data.pop('products')
+        products = validated_data.pop("items")
         order = Order.objects.create(**validated_data)
         for product in products:
             OrderItem.objects.create(
-                order=order,
-                price=product['product'].price,
-                **product
+                order=order, price=product["product"].price, **product
             )
         return order
 
+
 def banners_list_api(request):
     # FIXME move data to db?
-    return JsonResponse([
-        {
-            'title': 'Burger',
-            'src': static('burger.jpg'),
-            'text': 'Tasty Burger at your door step',
+    return JsonResponse(
+        [
+            {
+                "title": "Burger",
+                "src": static("burger.jpg"),
+                "text": "Tasty Burger at your door step",
+            },
+            {
+                "title": "Spices",
+                "src": static("food.jpg"),
+                "text": "All Cuisines",
+            },
+            {
+                "title": "New York",
+                "src": static("tasty.jpg"),
+                "text": "Food is incomplete without a tasty dessert",
+            },
+        ],
+        safe=False,
+        json_dumps_params={
+            "ensure_ascii": False,
+            "indent": 4,
         },
-        {
-            'title': 'Spices',
-            'src': static('food.jpg'),
-            'text': 'All Cuisines',
-        },
-        {
-            'title': 'New York',
-            'src': static('tasty.jpg'),
-            'text': 'Food is incomplete without a tasty dessert',
-        }
-    ], safe=False, json_dumps_params={
-        'ensure_ascii': False,
-        'indent': 4,
-    })
+    )
 
 
 def product_list_api(request):
-    products = Product.objects.select_related('category').available()
+    products = Product.objects.select_related("category").available()
 
     dumped_products = []
     for product in products:
         dumped_product = {
-            'id': product.id,
-            'name': product.name,
-            'price': product.price,
-            'special_status': product.special_status,
-            'description': product.description,
-            'category': {
-                'id': product.category.id,
-                'name': product.category.name,
-            } if product.category else None,
-            'image': product.image.url,
-            'restaurant': {
-                'id': product.id,
-                'name': product.name,
-            }
+            "id": product.id,
+            "name": product.name,
+            "price": product.price,
+            "special_status": product.special_status,
+            "description": product.description,
+            "category": (
+                {
+                    "id": product.category.id,
+                    "name": product.category.name,
+                }
+                if product.category
+                else None
+            ),
+            "image": product.image.url,
+            "restaurant": {
+                "id": product.id,
+                "name": product.name,
+            },
         }
         dumped_products.append(dumped_product)
-    return JsonResponse(dumped_products, safe=False, json_dumps_params={
-        'ensure_ascii': False,
-        'indent': 4,
-    })
+    return JsonResponse(
+        dumped_products,
+        safe=False,
+        json_dumps_params={
+            "ensure_ascii": False,
+            "indent": 4,
+        },
+    )
 
-@api_view(['GET', 'POST'])
+
+@api_view(["GET", "POST"])
 def register_order(request):
-    if request.method == 'GET':
+    if request.method == "GET":
         return Response({})
 
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    order = serializer.save()
+    serializer.save()
 
-    return Response(OrderSerializer(order).data)
+    return Response(serializer.data)
