@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import user_passes_test
 from collections import defaultdict
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-from .coordinates_calculation import fetch_coordinates, get_distance
+from .coordinates_calculation import fetch_coordinates_for_addresses, get_distance
 
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem, OrderItem
@@ -111,27 +111,32 @@ def view_orders(request):
             if order_product_ids <= product_ids:
                 order.available_restaurants.append(restaurants[restaurant_id])
 
+    addresses = {order.address for order in orders}
     for order in orders:
-        try:
-            client_coordinates = fetch_coordinates(yandex_apikey, order.address)
-        except requests.exceptions.RequestException:
-            client_coordinates = None
-
-        order.restaurants_with_distance = []
         for restaurant in order.available_restaurants:
-            try:
-                restaurant_coordinates = fetch_coordinates(yandex_apikey, restaurant.address)
-            except requests.exceptions.RequestException:
-                restaurant_coordinates = None
+            addresses.add(restaurant.address)
+
+    coordinates_by_address = fetch_coordinates_for_addresses(yandex_apikey, addresses)
+
+    for order in orders:
+        order_coordinates = coordinates_by_address[order.address]
+        order.restaurants_with_distance = []
+
+        for restaurant in order.available_restaurants:
+            restaurant_coordinates = coordinates_by_address[restaurant.address]
 
             restaurant_distance = None
-            if client_coordinates and restaurant_coordinates:
-                client_lon, client_lat = client_coordinates
-                restaurant_lon, restaurant_lat = restaurant_coordinates
-                restaurant_distance = get_distance(restaurant_lat, restaurant_lon, client_lat, client_lon)
+            if order_coordinates and restaurant_coordinates:
+                restaurant_distance = get_distance(order_coordinates, restaurant_coordinates)
+
             order.restaurants_with_distance.append((restaurant, restaurant_distance))
 
-        order.restaurants_with_distance = sorted(order.restaurants_with_distance, key=lambda item: item[1])
+
+        order.restaurants_with_distance = sorted(order.restaurants_with_distance, key=lambda item: (
+            item[1]
+            if item[1] is not None
+            else float('inf')
+        ))
 
 
     return render(request, template_name='order_items.html', context={

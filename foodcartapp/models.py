@@ -243,3 +243,15 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"Товары в заказе - {self.product.name}, {self.quantity} шт."
+
+class Address(models.Model):
+    address = models.CharField('адрес', max_length=100, unique=True)
+    lat = models.FloatField('широта', null=True, blank=True)
+    lon = models.FloatField('долгота', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'адрес'
+        verbose_name_plural = 'адреса'
+
+    def __str__(self):
+        return self.address
