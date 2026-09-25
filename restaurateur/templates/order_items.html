@@ -34,7 +34,9 @@
       <td>{{ order.get_status_display }}</td>
       <td>{{ order.comment }}</td>
       <td>
-        {% if order.status == 'CREATED' %}
+        {% if not order.coordinates_available %}
+          Адрес не найден
+        {% elif order.status == 'CREATED' %}
         <details>
         <summary>Может быть приготовлено ресторанами: ↓</summary>
         <ul>

@@ -138,7 +138,7 @@ class RestaurantMenuItem(models.Model):
 
 class Order(models.Model):
     class Status(models.TextChoices):
-        CREATED = "CREATED", "Принят"
+        CREATED = "CREATED", "Не обработан"
         COOKING = "COOKING", "Готовится"
         DELIVERING = "DELIVERING", "У курьера"
         COMPLETED = "COMPLETED", "Доставлен"
@@ -172,6 +172,7 @@ class Order(models.Model):
         max_length=15,
         choices=PaymentMethod.choices,
         blank=True,
+        db_index=True,
     )
 
     comment = models.TextField("комментарий", blank=True)
@@ -185,11 +186,13 @@ class Order(models.Model):
         "время звонка менеджера",
         blank=True,
         null=True,
+        db_index=True,
     )
     delivered_at = models.DateTimeField(
         "время доставки",
         blank=True,
         null=True,
+        db_index=True,
     )
     restaurant = models.ForeignKey(
         Restaurant,

@@ -96,11 +96,8 @@ def product_list_api(request):
     )
 
 
-@api_view(["GET", "POST"])
+@api_view(["POST"])
 def register_order(request):
-    if request.method == "GET":
-        return Response({})
-
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     serializer.save()

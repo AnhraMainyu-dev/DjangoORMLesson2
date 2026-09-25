@@ -133,9 +133,11 @@ def view_orders(request):
     coordinates_by_address = Address.objects.get_coordinates(addresses)
 
     for order in orders:
+        order_coordinates = coordinates_by_address[order.address]
+        order.coordinates_available = order_coordinates is not None
         order.restaurants_with_distance = measure_distances(
             order.available_restaurants,
-            coordinates_by_address[order.address],
+            order_coordinates,
             coordinates_by_address,
         )
 
