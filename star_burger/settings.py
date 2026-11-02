@@ -12,8 +12,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 SECRET_KEY = env("SECRET_KEY")
 YANDEX_API_KEY = env("YANDEX_API_KEY")
 DEBUG = env.bool("DEBUG", True)
-ROLLBAR_ACCESS_TOKEN = os.getenv('ROLLBAR_ACCESS_TOKEN')
-ROLLBAR_ENVIRONMENT = os.getenv('ROLLBAR_ENVIRONMENT', 'development')
+
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
 
@@ -63,10 +62,10 @@ DEBUG_TOOLBAR_PANELS = [
 
 
 ROLLBAR = {
-    'access_token': os.getenv('ROLLBAR_ACCESS_TOKEN'),
-    'environment': os.getenv('ROLLBAR_ENVIRONMENT', 'development'),
-    'code_version': os.getenv('GIT_SHA', '1.0.0'),
-    'root': BASE_DIR,
+    'access_token': env.str('ROLLBAR_ACCESS_TOKEN', None),
+    'environment': env.str('ROLLBAR_ENVIRONMENT', 'development'),
+    'code_version': env.str('GIT_SHA', '1.0.0'),
+    'root': str(BASE_DIR),
 }
 
 TEMPLATES = [
