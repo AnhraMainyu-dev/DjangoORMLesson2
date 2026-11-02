@@ -1,4 +1,4 @@
-django~=6.1.1
+django~=6.1.2
 django-debug-toolbar~=8.0.0
 Pillow~=12.3.0
 environs[django]~=15.2.0
@@ -7,3 +7,4 @@ djangorestframework~=3.18.1
 requests~=2.34.2
 geopy~=2.5.0
 dj_database_url~=3.1.2
+rollbar>=0.16.0
