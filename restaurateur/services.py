@@ -20,9 +20,5 @@ def measure_distances(order_restaurants, order_coordinates, coordinates_by_addre
     ]
     return sorted(
         restaurants_with_distance,
-        key=lambda item: (
-            item[1]
-            if item[1] is not None
-            else float('inf')
-    ))
-
+        key=lambda item: (item[1] if item[1] is not None else float("inf")),
+    )

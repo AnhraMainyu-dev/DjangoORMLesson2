@@ -145,5 +145,7 @@ cython_debug/
 .idea
 .materials
 db.sqlite3
+db.sqlite3.bak
 media
+dump.json
 

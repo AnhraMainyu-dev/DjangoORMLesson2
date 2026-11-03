@@ -59,7 +59,21 @@ pip install -r requirements.txt
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```
 
-Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
+Проект использует PostgreSQL.
+
+1. Установите PostgreSQL
+2. Создайте пользователя и базу данных:
+   ```sql
+   CREATE USER starburger WITH PASSWORD 'ваш_пароль';
+   CREATE DATABASE starburger OWNER starburger;
+   ```
+3. Добавьте в файл `.env` адрес базы:
+   ```
+   DATABASE_URL=postgres://starburger:пароль@localhost:5432/starburger
+   ```
+   Формат: `postgres://ПОЛЬЗОВАТЕЛЬ:ПАРОЛЬ@ХОСТ:ПОРТ/ИМЯ_БАЗЫ`.
+
+Отмигрируйте следующей командой:
 
 ```sh
 python manage.py migrate
@@ -149,6 +163,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/5.2/ref/settings/#allowed-hosts)
 - `YANDEX_API_KEY` - API-ключ к сервису Яндекс-геокодера. Необходим для рассчёта расстояния от ресторана к адресу заказа. Получить можно в [кабинете разработчика Яндека](developer.tech.yandex.ru),
 требуется регистрация.
+- `DATABASE_URL` - адрес базы, по которому проект будет подключаться к PSQL
 
 ## Цели проекта
 

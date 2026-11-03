@@ -5,7 +5,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
-
 from .models import Order, OrderItem, Product
 
 
@@ -16,7 +15,7 @@ class OrderItemSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = OrderItemSerializer(many=True, allow_empty=False, source='items')
+    products = OrderItemSerializer(many=True, allow_empty=False, source="items")
 
     class Meta:
         model = Order
