@@ -15,7 +15,7 @@ DEBUG = env.bool("DEBUG", True)
 
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 INSTALLED_APPS = [
     "foodcartapp.apps.FoodcartappConfig",
@@ -93,9 +93,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
 DATABASES = {
-    'default': env.dj_db_url(
-        'DATABASE_URL',
-        'postgres://starburger:starburger@localhost:5432/starburger',
+    "default": env.dj_db_url(
+        "DATABASE_URL",
+        "postgres://starburger:starburger@localhost:5432/starburger",
     ),
 }
 
