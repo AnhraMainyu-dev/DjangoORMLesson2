@@ -1,6 +1,5 @@
 import os
 
-import dj_database_url
 from environs import Env
 
 env = Env()
@@ -16,6 +15,7 @@ DEBUG = env.bool("DEBUG", True)
 
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     "foodcartapp.apps.FoodcartappConfig",
