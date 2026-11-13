@@ -9,3 +9,4 @@ geopy~=2.5.0
 dj_database_url~=3.1.2
 rollbar~=1.5.0
 psycopg2-binary==2.9.13
+gunicorn==23.0.0
