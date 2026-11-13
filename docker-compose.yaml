@@ -30,11 +30,12 @@ services:
       environment:
         DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       volumes:
+        - .:/starburger
         - bundles:/starburger/bundles
         - media:/starburger/media
       ports:
         - "127.0.0.1:8000:8000"
-      command: gunicorn star_burger.wsgi:application --bind 0.0.0.0:8000 --workers 3
+      command: python manage.py runserver 0.0.0.0:8000
       depends_on:
         db:
           condition: service_healthy
@@ -44,3 +45,4 @@ services:
 volumes:
   db_data:
   bundles:
+  media:
